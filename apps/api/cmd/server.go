@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	// "github.com/egeuysall/cove/internal/utils"
+	"github.com/egeuysall/drop/internal/utils"
 	"log"
 	"net/http"
 	"os"
 
-	// "github.com/egeuysall/cove/internal/api"
-	// supabase "github.com/egeuysall/cove/internal/supabase"
-	// generated "github.com/egeuysall/cove/internal/supabase/generated"
+	"github.com/egeuysall/drop/internal/api"
+	supabase "github.com/egeuysall/drop/internal/supabase"
+	generated "github.com/egeuysall/drop/internal/supabase/generated"
 	"github.com/joho/godotenv"
 )
 

@@ -2,7 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	// "github.com/egeuysall/cove/internal/utils"
+
+	"github.com/egeuysall/drop/internal/utils"
 )
 
 func HandleRoot(w http.ResponseWriter, r *http.Request) {

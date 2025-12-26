@@ -39,8 +39,8 @@ package api
 import (
 	"time"
 
-	// "github.com/egeuysall/cove/internal/handlers"
-	// appmid "github.com/egeuysall/cove/internal/middleware"
+	"github.com/egeuysall/drop/internal/handlers"
+	appmid "github.com/egeuysall/drop/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/httprate"
