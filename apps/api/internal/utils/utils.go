@@ -16,21 +16,10 @@ func Init(q *generated.Queries) {
 	Queries = q
 }
 
-func SendJson(w http.ResponseWriter, message interface{}, statusCode int) {
+func SendJson(w http.ResponseWriter, message any, statusCode int) {
 	w.WriteHeader(statusCode)
 
-	response := map[string]interface{}{"data": message}
-	err := json.NewEncoder(w).Encode(response)
-
-	if err != nil {
-		SendError(w, "Failed to encode JSON response", http.StatusInternalServerError)
-	}
-}
-
-func CheckStatus(w http.ResponseWriter, message interface{}, statusCode int) {
-	w.WriteHeader(statusCode)
-
-	response := map[string]interface{}{"status": message}
+	response := map[string]any{"data": message}
 	err := json.NewEncoder(w).Encode(response)
 
 	if err != nil {

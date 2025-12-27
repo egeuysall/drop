@@ -1,9 +1,10 @@
 package router
 
 import (
+	"encoding/json"
+	"net/http"
 	"time"
 
-	"github.com/egeuysall/drop/internal/handlers"
 	appmid "github.com/egeuysall/drop/internal/middleware"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -12,9 +13,6 @@ import (
 
 func Router() *chi.Mux {
 	r := chi.NewRouter()
-
-	// Initialize handlers
-	waitlistHandler := handlers.NewWaitlistHandler()
 
 	// Global middleware configuration
 	// These middleware are applied to all incoming requests
@@ -30,16 +28,32 @@ func Router() *chi.Mux {
 	)
 
 	// Public routes - accessible without authentication
-	r.Get("/", handlers.HandleRoot)
-	r.Get("/health", handlers.HandleHealth)
+	r.Get("/", handleRoot)
+	r.Get("/health", handleHealth)
 
 	// Protected API v1 routes - require authentication
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(appmid.RequireAuth())
 
 		// Routes
-		r.Post("/waitlist/join", waitlistHandler.Join)
+		// TODO: Implement routes
 	})
 
 	return r
+}
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	response := map[string]string{"message": "Drop API"}
+	json.NewEncoder(w).Encode(response)
+}
+
+func handleHealth(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	statusResponse := map[string]string{"status": "Healthy"}
+	json.NewEncoder(w).Encode(statusResponse)
 }

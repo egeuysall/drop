@@ -19,10 +19,9 @@
 //
 // Import this package and use the middleware functions with your router:
 //
-//   r.Use(middleware.RequireAuth())
-//   r.Use(middleware.Cors())
-//   r.Use(middleware.SetContentType())
-//
+//	r.Use(middleware.RequireAuth())
+//	r.Use(middleware.Cors())
+//	r.Use(middleware.SetContentType())
 package middleware
 
 import (
@@ -84,7 +83,7 @@ func RequireAuth() func(http.Handler) http.Handler {
 			tokenStr := parts[1]
 
 			// Parse and validate the token
-			token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+			token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (any, error) {
 				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 					return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 				}
