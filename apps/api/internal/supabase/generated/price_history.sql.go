@@ -13,7 +13,7 @@ import (
 
 const createPriceHistory = `-- name: CreatePriceHistory :one
 INSERT INTO price_history (
-    item_id, 
+    item_id,
     price
 ) VALUES (
     $1, $2
@@ -39,9 +39,9 @@ func (q *Queries) CreatePriceHistory(ctx context.Context, arg CreatePriceHistory
 }
 
 const getPriceHistoryForItem = `-- name: GetPriceHistoryForItem :many
-SELECT id, item_id, price, scraped_at FROM price_history 
-WHERE item_id = $1 
-ORDER BY scraped_at DESC 
+SELECT id, item_id, price, scraped_at FROM price_history
+WHERE item_id = $1
+ORDER BY scraped_at DESC
 LIMIT $2
 `
 
@@ -77,7 +77,7 @@ func (q *Queries) GetPriceHistoryForItem(ctx context.Context, arg GetPriceHistor
 }
 
 const getPriceHistoryStats = `-- name: GetPriceHistoryStats :one
-SELECT 
+SELECT
     item_id,
     MIN(price) as min_price,
     MAX(price) as max_price,

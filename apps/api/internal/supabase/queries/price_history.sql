@@ -1,7 +1,7 @@
 -- name: CreatePriceHistory :one
 -- Create a new price history entry
 INSERT INTO price_history (
-    item_id, 
+    item_id,
     price
 ) VALUES (
     $1, $2
@@ -9,9 +9,9 @@ INSERT INTO price_history (
 
 -- name: GetPriceHistoryForItem :many
 -- Get price history for a specific tracked item
-SELECT * FROM price_history 
-WHERE item_id = $1 
-ORDER BY scraped_at DESC 
+SELECT * FROM price_history
+WHERE item_id = $1
+ORDER BY scraped_at DESC
 LIMIT $2;
 
 -- name: GetRecentPriceHistory :many
@@ -27,7 +27,7 @@ ORDER BY ph.item_id;
 
 -- name: GetPriceHistoryStats :one
 -- Get price statistics for a tracked item
-SELECT 
+SELECT
     item_id,
     MIN(price) as min_price,
     MAX(price) as max_price,

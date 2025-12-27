@@ -13,11 +13,11 @@ import (
 
 const createTrackedItem = `-- name: CreateTrackedItem :one
 INSERT INTO tracked_items (
-    user_id, 
-    url, 
-    name, 
-    current_price, 
-    target_price, 
+    user_id,
+    url,
+    name,
+    current_price,
+    target_price,
     in_stock
 ) VALUES (
     $1, $2, $3, $4, $5, $6
@@ -59,7 +59,7 @@ func (q *Queries) CreateTrackedItem(ctx context.Context, arg CreateTrackedItemPa
 }
 
 const deleteTrackedItem = `-- name: DeleteTrackedItem :exec
-DELETE FROM tracked_items 
+DELETE FROM tracked_items
 WHERE id = $1 AND user_id = $2
 `
 
@@ -75,7 +75,7 @@ func (q *Queries) DeleteTrackedItem(ctx context.Context, arg DeleteTrackedItemPa
 }
 
 const getTrackedItem = `-- name: GetTrackedItem :one
-SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items 
+SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items
 WHERE id = $1 AND user_id = $2
 `
 
@@ -103,7 +103,7 @@ func (q *Queries) GetTrackedItem(ctx context.Context, arg GetTrackedItemParams) 
 }
 
 const getTrackedItemsDueForCheck = `-- name: GetTrackedItemsDueForCheck :many
-SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items 
+SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items
 WHERE last_checked_at < NOW() - INTERVAL '6 hours'
 ORDER BY last_checked_at ASC
 `
@@ -140,8 +140,8 @@ func (q *Queries) GetTrackedItemsDueForCheck(ctx context.Context) ([]TrackedItem
 }
 
 const listTrackedItems = `-- name: ListTrackedItems :many
-SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items 
-WHERE user_id = $1 
+SELECT id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at FROM tracked_items
+WHERE user_id = $1
 ORDER BY created_at DESC
 `
 
@@ -227,20 +227,26 @@ func (q *Queries) UpdateTrackedItem(ctx context.Context, arg UpdateTrackedItemPa
 const updateTrackedItemPrice = `-- name: UpdateTrackedItemPrice :one
 UPDATE tracked_items SET
     current_price = $2,
+    in_stock = $3,
     last_checked_at = NOW()
-WHERE id = $1 AND user_id = $3
+WHERE id = $1 AND user_id = $4
 RETURNING id, user_id, url, name, current_price, target_price, in_stock, created_at, last_checked_at
 `
 
 type UpdateTrackedItemPriceParams struct {
 	ID           pgtype.UUID
 	CurrentPrice pgtype.Numeric
+	InStock      pgtype.Bool
 	UserID       pgtype.UUID
 }
 
-// Update only the price of a tracked item
 func (q *Queries) UpdateTrackedItemPrice(ctx context.Context, arg UpdateTrackedItemPriceParams) (TrackedItem, error) {
-	row := q.db.QueryRow(ctx, updateTrackedItemPrice, arg.ID, arg.CurrentPrice, arg.UserID)
+	row := q.db.QueryRow(ctx, updateTrackedItemPrice,
+		arg.ID,
+		arg.CurrentPrice,
+		arg.InStock,
+		arg.UserID,
+	)
 	var i TrackedItem
 	err := row.Scan(
 		&i.ID,

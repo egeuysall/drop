@@ -28,3 +28,12 @@ type PriceStats struct {
     AvgPrice     float64
     HistoryCount int64
 }
+
+type PriceDropCheck struct {
+    ID                 string
+    Name               string
+    CurrentPrice       float64
+    TargetPrice        *float64
+    IsPriceDrop        bool
+    IsAtOrBelowTarget  bool
+}

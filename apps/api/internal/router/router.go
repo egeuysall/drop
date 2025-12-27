@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/httprate"
 )
 
-func Router() *chi.Mux {
+func Router(handlers Handlers) *chi.Mux {
 	r := chi.NewRouter()
 
 	// Global middleware configuration
@@ -35,8 +35,18 @@ func Router() *chi.Mux {
 	r.Route("/v1", func(r chi.Router) {
 		r.Use(appmid.RequireAuth())
 
-		// Routes
-		// TODO: Implement routes
+		// Items routes
+		r.Route("/items", func(r chi.Router) {
+			r.Post("/", handlers.Items.CreateItem)
+			r.Get("/", handlers.Items.ListItems)
+			r.Get("/{id}", handlers.Items.GetItem)
+			r.Put("/{id}", handlers.Items.UpdateItem)
+			r.Delete("/{id}", handlers.Items.DeleteItem)
+			r.Patch("/{id}/price", handlers.Items.UpdateItemPrice)
+			r.Get("/{id}/history", handlers.Items.GetPriceHistory)
+			r.Get("/{id}/stats", handlers.Items.GetPriceStats)
+			r.Get("/{id}/check", handlers.Items.CheckPriceDrop)
+		})
 	})
 
 	return r

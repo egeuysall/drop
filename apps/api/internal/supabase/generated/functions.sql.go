@@ -12,7 +12,7 @@ import (
 )
 
 const checkPriceDrop = `-- name: CheckPriceDrop :one
-SELECT 
+SELECT
     ti.id,
     ti.name,
     ti.current_price,
@@ -50,6 +50,44 @@ func (q *Queries) CheckPriceDrop(ctx context.Context, arg CheckPriceDropParams) 
 		&i.IsAtOrBelowTarget,
 	)
 	return i, err
+}
+
+const getPriceHistoryByDays = `-- name: GetPriceHistoryByDays :many
+SELECT id, item_id, price, scraped_at FROM price_history 
+WHERE item_id = $1 
+AND scraped_at >= NOW() - (make_interval(days => $2))
+ORDER BY scraped_at DESC
+`
+
+type GetPriceHistoryByDaysParams struct {
+	ItemID pgtype.UUID
+	Days   int32
+}
+
+// Get price history for a specific tracked item within X days
+func (q *Queries) GetPriceHistoryByDays(ctx context.Context, arg GetPriceHistoryByDaysParams) ([]PriceHistory, error) {
+	rows, err := q.db.Query(ctx, getPriceHistoryByDays, arg.ItemID, arg.Days)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []PriceHistory
+	for rows.Next() {
+		var i PriceHistory
+		if err := rows.Scan(
+			&i.ID,
+			&i.ItemID,
+			&i.Price,
+			&i.ScrapedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getPriceHistoryForItemWithFunction = `-- name: GetPriceHistoryForItemWithFunction :many

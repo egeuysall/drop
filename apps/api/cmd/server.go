@@ -12,6 +12,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/egeuysall/drop/internal/modules/items"
 	"github.com/egeuysall/drop/internal/router"
 	"github.com/egeuysall/drop/internal/utils"
 
@@ -39,8 +40,19 @@ func main() {
 	// Initialize utility functions with database queries
 	utils.Init(queries)
 
+	// Initialize items repository and service
+	itemsRepo := items.NewRepository(queries)
+	itemsService := items.NewService(itemsRepo)
+	itemsHandler := items.NewHandler(itemsService)
+
+	// Initialize handlers
+	handlers := router.Handlers{
+		// Add other handlers here as needed
+		Items: itemsHandler,
+	}
+
 	// Initialize HTTP router with all routes and middleware
-	router := router.Router()
+	router := router.Router(handlers)
 
 	// Get server port from environment variables
 	portStr := os.Getenv("PORT")

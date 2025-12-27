@@ -2,9 +2,16 @@
 -- Get price history for an item using the helper function
 SELECT * FROM get_price_history($1, $2);
 
+-- name: GetPriceHistoryByDays :many
+-- Get price history for a specific tracked item within X days
+SELECT * FROM price_history 
+WHERE item_id = $1 
+AND scraped_at >= NOW() - (make_interval(days => $2))
+ORDER BY scraped_at DESC;
+
 -- name: CheckPriceDrop :one
 -- Check if current price is below target price
-SELECT 
+SELECT
     ti.id,
     ti.name,
     ti.current_price,
