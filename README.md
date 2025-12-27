@@ -3,6 +3,7 @@
 A simple full-stack app that tracks product prices and shows when they drop.
 
 ## Stack
+
 - Backend: Go
 - Database: PostgreSQL
 - Frontend: Next.js + TypeScript
@@ -10,6 +11,7 @@ A simple full-stack app that tracks product prices and shows when they drop.
 - Scraping: goquery
 
 ## Features
+
 - User signup & login
 - Track product URLs
 - Store current price + price history
@@ -18,11 +20,13 @@ A simple full-stack app that tracks product prices and shows when they drop.
 - Web dashboard
 
 ## Database Tables
+
 - users
 - tracked_items
 - price_history
 
 ## Project Structure
+
 - cmd/server – app entry point
 - internal/auth – authentication logic
 - internal/items – item tracking logic
@@ -31,6 +35,7 @@ A simple full-stack app that tracks product prices and shows when they drop.
 - web – Next.js frontend
 
 ## Development Plan
+
 - Day 1: Auth, DB schema, item tracking (fake prices)
 - Day 2: Real price scraping
 - Day 3: Background price refresh
