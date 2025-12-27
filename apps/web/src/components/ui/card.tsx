@@ -7,7 +7,7 @@ function Card({ className, ...props }: React.ComponentProps<'div'>) {
     <div
       data-slot="card"
       className={cn(
-        'bg-neutral-100 border border-neutral-300 dark:bg-neutral-900 dark:border-neutral-700 flex flex-col gap-sm rounded-md py-xl',
+        'gap-sm py-xl flex flex-col rounded-md border border-neutral-300 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900',
         className
       )}
       {...props}
@@ -19,7 +19,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-header"
-      className={cn('grid auto-rows-min grid-rows-[auto_auto] items-start px-xl', className)}
+      className={cn('px-xl grid auto-rows-min grid-rows-[auto_auto] items-start', className)}
       {...props}
     />
   );
@@ -29,7 +29,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
       data-slot="card-title"
-      className={cn('font-semibold font-heading', className)}
+      className={cn('font-heading font-semibold', className)}
       {...props}
     />
   );
@@ -61,7 +61,7 @@ function CardContent({ className, ...props }: React.ComponentProps<'div'>) {
 
 function CardFooter({ className, ...props }: React.ComponentProps<'div'>) {
   return (
-    <div data-slot="card-footer" className={cn('flex items-center px-xl', className)} {...props} />
+    <div data-slot="card-footer" className={cn('px-xl flex items-center', className)} {...props} />
   );
 }
 

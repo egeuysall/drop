@@ -5,6 +5,7 @@ import '@/styles/globals.css';
 import type { Metadata } from 'next';
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Providers } from '@/lib/providers';
 
 // Fonts
 import { inter, dmSans, jetbrainsMono } from '@/lib/fonts';
@@ -244,8 +245,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         />
       </head>
       <body className="w-full h-full flex-center">
-        <LayoutWrapper jsonLdData={jsonLd}>
-          <main className="w-[90vw] md:w-[92.5vw] lg:w-[95vw]">
+        <Providers>
+          <LayoutWrapper jsonLdData={jsonLd}>
+            <main className="w-[90vw] md:w-[92.5vw] lg:w-[95vw]">
             <div className="mb-24">
               <Header />
             </div>
@@ -257,6 +259,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </aside>
           </main>
         </LayoutWrapper>
+        </Providers>
       </body>
     </html>
   );
