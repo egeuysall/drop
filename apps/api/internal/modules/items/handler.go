@@ -41,7 +41,7 @@ func (h *Handler) CreateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, response, http.StatusCreated)
+	utils.SendJSON(w, response, http.StatusCreated)
 }
 
 // GetItem handles GET /items/{id} - Get a specific item
@@ -59,7 +59,7 @@ func (h *Handler) GetItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, response, http.StatusOK)
+	utils.SendJSON(w, response, http.StatusOK)
 }
 
 // ListItems handles GET /items - List all user's items
@@ -76,7 +76,7 @@ func (h *Handler) ListItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, ListItemsResponse{Items: responses, Total: len(responses)}, http.StatusOK)
+	utils.SendJSON(w, ListItemsResponse{Items: responses, Total: len(responses)}, http.StatusOK)
 }
 
 // UpdateItem handles PUT /items/{id} - Update an item
@@ -100,7 +100,7 @@ func (h *Handler) UpdateItem(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, response, http.StatusOK)
+	utils.SendJSON(w, response, http.StatusOK)
 }
 
 // DeleteItem handles DELETE /items/{id} - Delete an item
@@ -141,7 +141,7 @@ func (h *Handler) UpdateItemPrice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, response, http.StatusOK)
+	utils.SendJSON(w, response, http.StatusOK)
 }
 
 // GetPriceHistory handles GET /items/{id}/history - Get price history
@@ -159,7 +159,7 @@ func (h *Handler) GetPriceHistory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, history, http.StatusOK)
+	utils.SendJSON(w, history, http.StatusOK)
 }
 
 // GetPriceStats handles GET /items/{id}/stats - Get price statistics
@@ -172,7 +172,7 @@ func (h *Handler) GetPriceStats(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, stats, http.StatusOK)
+	utils.SendJSON(w, stats, http.StatusOK)
 }
 
 // CheckPriceDrop handles GET /items/{id}/check - Check for price drops
@@ -190,5 +190,5 @@ func (h *Handler) CheckPriceDrop(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SendJson(w, check, http.StatusOK)
+	utils.SendJSON(w, check, http.StatusOK)
 }

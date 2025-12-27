@@ -19,7 +19,7 @@ func Init(q *generated.Queries) {
 	Queries = q
 }
 
-func SendJson(w http.ResponseWriter, message any, statusCode int) {
+func SendJSON(w http.ResponseWriter, message any, statusCode int) {
 	w.WriteHeader(statusCode)
 
 	response := map[string]any{"data": message}
