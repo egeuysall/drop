@@ -1,10 +1,12 @@
 package items
 
 import (
-    "context"
-    "fmt"
+	"context"
+	"fmt"
+	"strings"
 
-    "github.com/egeuysall/drop/internal/utils"
+	"github.com/egeuysall/drop/internal/modules/scraper"
+	"github.com/egeuysall/drop/internal/utils"
 )
 
 // Service defines the interface for items business logic
@@ -24,33 +26,47 @@ type Service interface {
 // service implements the Service interface
 type service struct {
 	repo Repository
+	scraper *scraper.Scraper
 }
 
-func NewService(repo Repository) Service {
+func NewService(repo Repository, scr *scraper.Scraper) Service {
 	return &service{
 		repo: repo,
+		scraper: scr,
 	}
 }
 
 // CreateItem handles the full item creation workflow
 func (s *service) CreateItem(ctx context.Context, userID string, req CreateItemRequest) (*ItemResponse, error) {
-    // 1. Basic URL validation
     if err := utils.ValidateURL(req.URL); err != nil {
         return nil, fmt.Errorf("invalid URL: %w", err)
     }
 
-    // 2. Check for duplicates
     if err := s.checkForDuplicates(ctx, userID, req.URL); err != nil {
         return nil, fmt.Errorf("duplicate item: %w", err)
     }
 
-    // 3. Set defaults
-    if req.InStock == nil {
-        inStock := true
-        req.InStock = &inStock
+    priceInfo, err := s.scraper.ScrapePrice(req.URL)
+
+    if err != nil {
+        if strings.Contains(err.Error(), "out of stock") {
+            currentPrice := 0.0
+
+            if req.TargetPrice != nil {
+                currentPrice = *req.TargetPrice
+            }
+
+            inStock := false
+            req.CurrentPrice = currentPrice
+            req.InStock = &inStock
+        } else {
+            return nil, fmt.Errorf("failed to scrape price: %w", err)
+        }
+    } else {
+        req.CurrentPrice = priceInfo.Price
+        req.InStock = &priceInfo.InStock
     }
 
-    // 4. Convert DTO to Model
     item := TrackedItem{
         UserID:       userID,
         URL:          req.URL,
@@ -60,13 +76,11 @@ func (s *service) CreateItem(ctx context.Context, userID string, req CreateItemR
         InStock:      req.InStock,
     }
 
-    // 5. Call repository
     createdItem, err := s.repo.CreateItem(ctx, item)
     if err != nil {
         return nil, fmt.Errorf("failed to create item: %w", err)
     }
 
-    // 6. Convert Model to DTO
     return &ItemResponse{
         ID:           createdItem.ID,
         URL:          createdItem.URL,

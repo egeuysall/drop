@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/egeuysall/drop/internal/modules/items"
+	"github.com/egeuysall/drop/internal/modules/scraper"
 	"github.com/egeuysall/drop/internal/router"
 	"github.com/egeuysall/drop/internal/utils"
 
@@ -41,8 +42,9 @@ func main() {
 	utils.Init(queries)
 
 	// Initialize items repository and service
+	scraper := scraper.NewScraper()
 	itemsRepo := items.NewRepository(queries)
-	itemsService := items.NewService(itemsRepo)
+	itemsService := items.NewService(itemsRepo, scraper)
 	itemsHandler := items.NewHandler(itemsService)
 
 	// Initialize handlers
