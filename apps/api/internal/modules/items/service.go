@@ -21,6 +21,7 @@ type Service interface {
 	GetPriceStats(ctx context.Context, id string) (*PriceStatsResponse, error)
 	CheckPriceDrop(ctx context.Context, id, userID string) (*PriceDropCheck, error)
 	GetItemsDueForCheck(ctx context.Context) ([]ItemResponse, error)
+	RefreshPrice(ctx context.Context, itemID, userID, url string) error
 }
 
 // service implements the Service interface
@@ -83,6 +84,7 @@ func (s *service) CreateItem(ctx context.Context, userID string, req CreateItemR
 
     return &ItemResponse{
         ID:           createdItem.ID,
+        UserID:       createdItem.UserID,
         URL:          createdItem.URL,
         Name:         createdItem.Name,
         CurrentPrice: createdItem.CurrentPrice,
@@ -101,6 +103,7 @@ func (s *service) GetItemByID(ctx context.Context, id, userID string) (*ItemResp
 
     return &ItemResponse{
         ID:            item.ID,
+        UserID:        item.UserID,
         URL:           item.URL,
         Name:          item.Name,
         CurrentPrice:  item.CurrentPrice,
@@ -122,6 +125,7 @@ func (s *service) ListItemsByUserID(ctx context.Context, userID string) ([]ItemR
     for i, item := range items {
         responses[i] = ItemResponse{
             ID:            item.ID,
+            UserID:        item.UserID,
             URL:           item.URL,
             Name:          item.Name,
             CurrentPrice:  item.CurrentPrice,
@@ -155,6 +159,7 @@ func (s *service) UpdateItemByID(ctx context.Context, id, userID string, req Upd
 
     return &ItemResponse{
         ID:            updatedItem.ID,
+        UserID:        updatedItem.UserID,
         URL:           updatedItem.URL,
         Name:          updatedItem.Name,
         CurrentPrice:  updatedItem.CurrentPrice,
@@ -184,6 +189,7 @@ func (s *service) UpdateItemPrice(ctx context.Context, id, userID string, curren
 
     return &ItemResponse{
         ID:            updatedItem.ID,
+        UserID:        updatedItem.UserID,
         URL:           updatedItem.URL,
         Name:          updatedItem.Name,
         CurrentPrice:  updatedItem.CurrentPrice,
@@ -289,6 +295,27 @@ func (s *service) checkForDuplicateURLChange(ctx context.Context, userID, curren
         if item.ID != currentItemID && item.URL == newURL {
             return fmt.Errorf("item with this URL already exists")
         }
+    }
+
+    return nil
+}
+
+func (s *service) RefreshPrice(ctx context.Context, itemID, userID, url string) error {
+    priceInfo, err := s.scraper.ScrapePrice(url)
+
+    if err != nil {
+        if strings.Contains(err.Error(), "out of stock") {
+            _, err := s.repo.UpdateItemPrice(ctx, itemID, userID, 0, false)
+            return err
+        }
+
+        return fmt.Errorf("failed to scrape price: %w", err)
+    }
+
+    _, err = s.repo.UpdateItemPrice(ctx, itemID, userID, priceInfo.Price, priceInfo.InStock)
+
+    if err != nil {
+        return fmt.Errorf("failed to update price: %w", err)
     }
 
     return nil

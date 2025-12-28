@@ -24,6 +24,7 @@ type UpdatePriceRequest struct {
 
 type ItemResponse struct {
     ID            string     `json:"id"`
+    UserID        string     `json:"user_id"`
     URL           string     `json:"url"`
     Name          string     `json:"name"`
     CurrentPrice  float64    `json:"current_price"`

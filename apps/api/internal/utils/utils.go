@@ -7,6 +7,9 @@ import (
 	"math/big"
 	"net/http"
 	"net/url"
+	"os"
+	"strconv"
+	"time"
 
 	generated "github.com/egeuysall/drop/internal/supabase/generated"
 	"github.com/google/uuid"
@@ -150,16 +153,60 @@ func ValidateURL(urlStr string) error {
     if err != nil {
         return fmt.Errorf("invalid URL format: %w", err)
     }
-    
+
     // Basic scheme check
     if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
         return fmt.Errorf("URL must use http:// or https:// protocol")
     }
-    
+
     // Basic host check
     if parsedURL.Host == "" {
         return fmt.Errorf("URL must include a host")
     }
-    
+
     return nil
+}
+
+func GetEnvironment() string {
+	env := os.Getenv("ENV")
+	if env == "" {
+		return "development"
+	}
+	return env
+}
+
+func ParseDuration(envVar, defaultValue string) time.Duration {
+    durationStr := os.Getenv(envVar)
+
+    if durationStr == "" {
+        durationStr = defaultValue
+    }
+
+    duration, err := time.ParseDuration(durationStr)
+
+    if err != nil {
+        log.Fatalf("Error parsing %s: %v", envVar, err)
+    }
+
+    return duration
+}
+
+func GetEnvInt(envVar string, defaultValue int) int {
+    valStr := os.Getenv(envVar)
+    if valStr == "" {
+        return defaultValue
+    }
+
+    val, err := strconv.Atoi(valStr)
+    if err != nil {
+        log.Printf("Warning: Invalid %s value '%s', using default %d", envVar, valStr, defaultValue)
+        return defaultValue
+    }
+
+    if val <= 0 {
+        log.Printf("Warning: %s must be positive, using default %d", envVar, defaultValue)
+        return defaultValue
+    }
+
+    return val
 }

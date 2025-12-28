@@ -2,7 +2,7 @@
 
 ---
 
-## Phase 1: Web Scraping (Day 2 - High Priority)
+<!--## Phase 1: Web Scraping (Day 2 - High Priority)
 **Goal**: Extract real prices from product URLs
 
 **Tasks**:
@@ -33,9 +33,9 @@
 **Success Criteria**:
 - [ ] Can add product URL and get actual price
 - [ ] Prices stored in database with history
-- [ ] Scraper handles various e-commerce sites
+- [ ] Scraper handles various e-commerce sites-->
 
-## Phase 2: Background Price Refresh (Day 3)
+<!--## Phase 2: Background Price Refresh (Day 3)
 **Goal**: Automatic price updates every 30 minutes
 
 **Tasks**:
@@ -65,7 +65,7 @@
 - [ ] Background job runs automatically
 - [ ] Prices update in database
 - [ ] Can manually trigger refresh
-- [ ] System handles scraping failures gracefully
+- [ ] System handles scraping failures gracefully-->
 
 ## Phase 3: Frontend Items UI (Day 5-6)
 **Goal**: Complete user interface for items management
@@ -105,7 +105,7 @@
 - [ ] Can see price history charts
 - [ ] Responsive and user-friendly UI
 
-## Phase 4: Concurrency & Performance (Day 4)
+<!--## Phase 4: Concurrency & Performance (Day 4)
 **Goal**: Faster scraping with parallel processing
 
 **Tasks**:
@@ -129,7 +129,7 @@
 - [ ] Can scrape 50 items in seconds
 - [ ] Workers run concurrently
 - [ ] Rate limiting prevents blocks
-- [ ] No data corruption
+- [ ] No data corruption-->
 
 ## Phase 5: Polish & Deploy (Day 7)
 **Goal**: Production-ready application

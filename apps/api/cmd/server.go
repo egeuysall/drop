@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/egeuysall/drop/internal/modules/items"
+	"github.com/egeuysall/drop/internal/modules/scheduler"
 	"github.com/egeuysall/drop/internal/modules/scraper"
 	"github.com/egeuysall/drop/internal/router"
 	"github.com/egeuysall/drop/internal/utils"
@@ -47,6 +48,11 @@ func main() {
 	itemsService := items.NewService(itemsRepo, scraper)
 	itemsHandler := items.NewHandler(itemsService)
 
+	// Initialize price refresher scheduler
+	schedulerInterval := utils.ParseDuration("SCHEDULER_INTERVAL", "30m")
+	workerCount := utils.GetEnvInt("SCHEDULER_WORKERS", 5)
+	priceScheduler := scheduler.NewPriceRefresherScheduler(itemsService, schedulerInterval, workerCount)
+
 	// Initialize handlers
 	handlers := router.Handlers{
 		// Add other handlers here as needed
@@ -72,21 +78,18 @@ func main() {
 
 	// Log server startup information
 	log.Printf("Server starting on http://localhost%s", addr)
-	log.Printf("Environment: %s", getEnvironment())
+	log.Printf("Environment: %s", utils.GetEnvironment())
 	log.Printf("Database connection established")
+
+	// Start scheduler in background before starting HTTP server
+    log.Printf("Starting price refresh scheduler with interval %v", schedulerInterval)
+    priceScheduler.Start()
 
 	// Start HTTP server
 	log.Printf("Listening on %s...", addr)
 	err = http.ListenAndServe(addr, router)
+
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
-}
-
-func getEnvironment() string {
-	env := os.Getenv("ENV")
-	if env == "" {
-		return "development"
-	}
-	return env
 }
