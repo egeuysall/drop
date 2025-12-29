@@ -25,10 +25,9 @@ export const Footer: React.FC = () => {
    * @property {string} slogan - The company's slogan or tagline.
    */
 
-  // TODO: Fill these
   const companyInfo = {
-    name: '',
-    slogan: '',
+    name: 'Drop',
+    slogan: 'Never miss a price drop again',
   };
 
   /**
@@ -39,23 +38,14 @@ export const Footer: React.FC = () => {
    * [{ title: 'Docs', href: '/docs' }]
    */
 
-  // TODO: Fill these
   const resourceLinks: ResourceLink[] = [
     {
-      title: '',
-      href: '',
+      title: 'Dashboard',
+      href: '/app',
     },
     {
-      title: '',
-      href: '',
-    },
-    {
-      title: '',
-      href: '',
-    },
-    {
-      title: '',
-      href: '',
+      title: 'GitHub',
+      href: 'https://github.com/egeuysall/drop',
     },
   ];
 
@@ -67,25 +57,24 @@ export const Footer: React.FC = () => {
    * [{ name: 'GitHub', href: 'https://github.com/', icon: Github, size: 28, ariaLabel: 'GitHub' }]
    */
 
-  // TODO: Fill these
   const socialLinks: SocialLink[] = [
     {
       name: 'Website',
-      href: '',
+      href: 'https://www.egeuysal.com',
       icon: Globe,
       size: 28,
       ariaLabel: 'Website',
     },
     {
       name: 'GitHub',
-      href: '',
+      href: 'https://github.com/egeuysall/drop',
       icon: Github,
       size: 28,
       ariaLabel: 'GitHub',
     },
     {
       name: 'Email',
-      href: '',
+      href: 'mailto:hi@egeuysal.com',
       icon: Mail,
       size: 28,
       ariaLabel: 'Email',

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useItems, useDeleteItem } from '@/lib/api/hooks';
+import { useItems, useDeleteItem, usePriceDropDetector } from '@/lib/api/hooks';
 import { type Item } from '@/lib/api/types';
 import { useItemsStore } from '@/lib/stores/items-store';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { Plus, Trash2, RefreshCw, CheckCircle2, TrendingUp, TrendingDown, AlertT
 import { toast } from 'sonner';
 import { AddItemDialog } from '@/components/items/add-item-dialog';
 import { PriceHistoryModal } from '@/components/items/price-history-modal';
+import { NotificationCenter } from '@/components/notifications/notification-center';
 import Link from 'next/link';
 
 /**
@@ -40,6 +41,9 @@ export default function ItemsDashboardPage() {
   } = useItemsStore();
 
   const { removeItem: removeZustandItem } = useItemsStore();
+
+  // Initialize price drop detector
+  usePriceDropDetector(60000); // Check every 60 seconds
 
   const handleDelete = (itemId: string) => {
     deleteItem(itemId, {
@@ -149,13 +153,16 @@ export default function ItemsDashboardPage() {
     <main className="container mx-auto py-8 px-4">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Your Tracked Items</h1>
-        <Button
-          onClick={() => setIsAddDialogOpen(true)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          <span>Add Item</span>
-        </Button>
+        <div className="flex items-center gap-4">
+          <NotificationCenter />
+          <Button
+            onClick={() => setIsAddDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            <span>Add Item</span>
+          </Button>
+        </div>
       </div>
 
       {items.length === 0 ? (

@@ -2,10 +2,13 @@
 
 import { useQuery, useMutation } from '@tanstack/react-query';
 import type { UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { apiFetch } from './client';
 import { createClient } from '../supabase/client';
 import type { ItemsResponse, Item, ItemCreateDTO, ItemUpdateDTO, PriceHistory, PriceStats } from './types';
 import { API_ENDPOINTS } from './types';
+import { useNotificationStore } from '../stores/notification-store';
+import { toast } from 'sonner';
 
 // Local User type for authentication
 export interface User {
@@ -342,4 +345,63 @@ export function useCheckPriceDrop() {
       }
     },
   });
+}
+
+/**
+ * Price drop detection hook that polls for price drops and shows notifications
+ * @param pollInterval - Interval in milliseconds to check for price drops (default: 60000)
+ */
+export function usePriceDropDetector(pollInterval = 60000) {
+  const { data: items, refetch } = useItems();
+  const { addNotification } = useNotificationStore();
+  
+  // Check for price drops whenever items change
+  useEffect(() => {
+    if (!items?.items) return;
+
+    const checkForPriceDrops = () => {
+      items.items.forEach(item => {
+        if (item.target_price && item.current_price <= item.target_price) {
+          // Check if this notification already exists in store
+          const notificationStore = useNotificationStore.getState();
+          const alreadyNotified = notificationStore.notifications.some(
+            n => n.itemId === item.id && n.currentPrice === item.current_price
+          );
+
+          if (!alreadyNotified) {
+            // Add to notification store
+            addNotification({
+              itemId: item.id,
+              itemName: item.name,
+              currentPrice: item.current_price,
+              targetPrice: item.target_price,
+              url: item.url,
+              createdAt: new Date().toISOString(),
+            });
+
+            // Show toast notification
+            toast.success(`🎉 Price Drop! ${item.name} is now $${item.current_price.toFixed(2)}${item.target_price ? ` (Target: $${item.target_price.toFixed(2)})` : ''}`, {
+              duration: 15000,
+              position: 'top-right',
+              action: {
+                label: 'View Product',
+                onClick: () => window.open(item.url, '_blank')
+              }
+            });
+          }
+        }
+      });
+    };
+
+    checkForPriceDrops();
+  }, [items, addNotification]);
+
+  // Set up polling
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refetch();
+    }, pollInterval);
+
+    return () => clearInterval(interval);
+  }, [refetch, pollInterval]);
 }

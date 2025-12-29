@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
@@ -20,24 +19,15 @@ export const Header: React.FC = () => {
    * The brand or site name to display in the header.
    * @type {string}
    */
-  const brandName = '';
-
-  /**
-   * Logo image path or URL for the header.
-   * @example '/logo.svg'
-   */
-  const logo = '';
+  const brandName = 'Drop';
 
   /**
    * The navigation menu items for the header.
    * Each item should have a unique id, a display title, and a link URL.
    */
   const menuItems = [
-    { id: 1, title: '', link: '' },
-    { id: 2, title: '', link: '' },
-    { id: 3, title: '', link: '' },
-    { id: 4, title: '', link: '' },
-    { id: 5, title: '', link: '' },
+    { id: 1, title: 'Dashboard', link: '/app' },
+    { id: 2, title: 'GitHub', link: 'https://github.com/egeuysall/drop' },
   ];
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState<boolean>(false);
@@ -63,19 +53,12 @@ export const Header: React.FC = () => {
     <div className="fixed top-lg left-0 right-0 z-10 flex justify-center px-2xl w-full">
       <div className="w-full">
         <header className="backdrop-blur-lg py-xs px-md rounded-md flex justify-between items-center border border-neutral-300 dark:border-neutral-700">
-          {/* Logo */}
+          {/* Brand Name */}
           <Link
             href="/"
             onClick={closeMobileMenu}
-            className="flex gap-2xs items-center flex-shrink-0 no-underline"
+            className="flex gap-2xs items-center shrink-0 no-underline"
           >
-            <Image
-              width={iconSize}
-              height={iconSize}
-              className="transition-opacity ease-in-out duration-200 hover:opacity-75"
-              alt="Logo"
-              src={logo}
-            />
             <span className="font-heading font-semibold text-base text-neutral-900 dark:text-neutral-100 hidden md:flex transition-colors duration-200 hover:text-neutral-700 hover:dark:text-neutral-300 ease-in-out">
               {brandName}
             </span>
@@ -116,13 +99,6 @@ export const Header: React.FC = () => {
               onClick={closeMobileMenu}
               className="flex gap-2xs items-center no-underline"
             >
-              <Image
-                width={iconSize}
-                height={iconSize}
-                className="transition-opacity duration-200 hover:opacity-75 ease-in-out"
-                alt="Logo"
-                src={logo}
-              />
               <span className="font-heading font-semibold text-base text-neutral-900 dark:text-neutral-100 transition-colors duration-200 hover:text-neutral-700 hover:dark:text-neutral-300 ease-in-out">
                 {brandName}
               </span>
