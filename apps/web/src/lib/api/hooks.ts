@@ -4,6 +4,8 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import type { UseQueryOptions, UseMutationOptions } from '@tanstack/react-query';
 import { apiFetch } from './client';
 import { createClient } from '../supabase/client';
+import type { ItemsResponse, Item, ItemCreateDTO, ItemUpdateDTO, PriceHistory, PriceStats } from './types';
+import { API_ENDPOINTS } from './types';
 
 // Local User type for authentication
 export interface User {
@@ -205,5 +207,139 @@ export function useSignOut() {
 
   return useMutation<void, Error, void>({
     mutationFn: signOut,
+  });
+}
+
+// Item-specific hooks
+export function useItems() {
+  return useQuery<ItemsResponse, Error>({
+    queryKey: ['items'],
+    queryFn: async () => {
+      const response = await apiFetch<ItemsResponse>(API_ENDPOINTS.ITEMS.LIST, {
+        method: 'GET',
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch items');
+      }
+
+      return response.data;
+    },
+  });
+}
+
+export function useItem(itemId: string) {
+  return useQuery<Item, Error>({
+    queryKey: ['items', itemId],
+    queryFn: async () => {
+      const response = await apiFetch<Item>(API_ENDPOINTS.ITEMS.DETAIL(itemId), {
+        method: 'GET',
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch item');
+      }
+
+      return response.data;
+    },
+    enabled: !!itemId,
+  });
+}
+
+export function useCreateItem() {
+  return useMutation<Item, Error, ItemCreateDTO>({
+    mutationFn: async (itemData) => {
+      const response = await apiFetch<Item>(API_ENDPOINTS.ITEMS.CREATE, {
+        method: 'POST',
+        body: JSON.stringify(itemData),
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to create item');
+      }
+
+      return response.data;
+    },
+  });
+}
+
+export function useUpdateItem() {
+  return useMutation<Item, Error, { id: string; data: ItemUpdateDTO }>({
+    mutationFn: async ({ id, data }) => {
+      const response = await apiFetch<Item>(API_ENDPOINTS.ITEMS.UPDATE(id), {
+        method: 'PUT',
+        body: JSON.stringify(data),
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to update item');
+      }
+
+      return response.data;
+    },
+  });
+}
+
+export function useDeleteItem() {
+  return useMutation<void, Error, string>({
+    mutationFn: async (itemId) => {
+      const response = await apiFetch<void>(API_ENDPOINTS.ITEMS.DELETE(itemId), {
+        method: 'DELETE',
+      });
+
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to delete item');
+      }
+    },
+  });
+}
+
+export function useItemPriceHistory(itemId: string) {
+  return useQuery<PriceHistory[], Error>({
+    queryKey: ['items', itemId, 'history'],
+    queryFn: async () => {
+      const response = await apiFetch<PriceHistory[]>(API_ENDPOINTS.ITEMS.HISTORY(itemId), {
+        method: 'GET',
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch price history');
+      }
+
+      return response.data;
+    },
+    enabled: !!itemId,
+  });
+}
+
+export function useItemStats(itemId: string) {
+  return useQuery<PriceStats, Error>({
+    queryKey: ['items', itemId, 'stats'],
+    queryFn: async () => {
+      const response = await apiFetch<PriceStats>(API_ENDPOINTS.ITEMS.STATS(itemId), {
+        method: 'GET',
+      });
+
+      if (!response.success || !response.data) {
+        throw new Error(response.error?.message || 'Failed to fetch item stats');
+      }
+
+      return response.data;
+    },
+    enabled: !!itemId,
+  });
+}
+
+export function useCheckPriceDrop() {
+  return useMutation<void, Error, string>({
+    mutationFn: async (itemId) => {
+      const response = await apiFetch<void>(API_ENDPOINTS.ITEMS.CHECK(itemId), {
+        method: 'GET',
+      });
+
+      if (!response.success) {
+        throw new Error(response.error?.message || 'Failed to check price drop');
+      }
+    },
   });
 }

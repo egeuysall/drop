@@ -2,8 +2,9 @@
 
 import { useUserSession, useSignOut } from '@/lib/api/hooks';
 import { Button } from '@/components/ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, ShoppingCart } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function AppPage() {
   const { data: user, isLoading } = useUserSession();
@@ -48,7 +49,7 @@ export default function AppPage() {
             You are signed in as {user.email}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           <Button
             onClick={() => signOut()}
             variant="destructive"
@@ -56,6 +57,16 @@ export default function AppPage() {
           >
             <LogOut className="h-4 w-4" />
             <span>Sign Out</span>
+          </Button>
+
+          <Button
+            asChild
+            className="flex w-full items-center justify-center gap-2"
+          >
+            <Link href="/app/items" className='no-underline'>
+              <ShoppingCart className="h-4 w-4" />
+              <span>View Your Items</span>
+            </Link>
           </Button>
         </CardContent>
       </Card>

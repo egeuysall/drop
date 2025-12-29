@@ -1,4 +1,3 @@
-import { withSentryConfig } from '@sentry/nextjs';
 import { PHASE_DEVELOPMENT_SERVER } from 'next/constants';
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import type { NextConfig } from 'next';
@@ -97,13 +96,5 @@ const withBundleAnalyzerConfig = withBundleAnalyzer({
 
 export default (phase: string) => {
   const baseConfig = nextConfig(phase);
-  const analyzedConfig = withBundleAnalyzerConfig(baseConfig);
-  
-  return process.env.NODE_ENV === 'production' 
-    ? withSentryConfig(analyzedConfig, {
-        silent: true,
-        org: process.env.SENTRY_ORG,
-        project: process.env.SENTRY_PROJECT,
-      })
-    : analyzedConfig;
+  return withBundleAnalyzerConfig(baseConfig);
 };

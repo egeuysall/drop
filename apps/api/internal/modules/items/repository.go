@@ -2,11 +2,13 @@ package items
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
+	"log"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	generated "github.com/egeuysall/drop/internal/supabase/generated"
 	"github.com/egeuysall/drop/internal/utils"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Repository interface {
@@ -33,10 +35,19 @@ func NewRepository(queries *generated.Queries) Repository {
 }
 
 func (r *repository) CreateItem(ctx context.Context, item TrackedItem) (*TrackedItem, error) {
-    userID, err := utils.ParseUUID(item.UserID)
-
-    if err != nil {
-        return nil, fmt.Errorf("invalid user ID: %w", err)
+    // Try to parse user ID as UUID, if it fails, generate a UUID from the string
+    var userID pgtype.UUID
+    if parsedUUID, err := utils.ParseUUID(item.UserID); err == nil {
+        userID = parsedUUID
+    } else {
+        // Generate a deterministic UUID from the string user ID
+        // This ensures we can always map the string ID to the same UUID
+        hash := sha256.Sum256([]byte(item.UserID))
+        userIDBytes := hash[:16] // Use first 16 bytes for UUID
+        var uuid pgtype.UUID
+        copy(uuid.Bytes[:], userIDBytes)
+        uuid.Valid = true
+        userID = uuid
     }
 
     params := generated.CreateTrackedItemParams{
@@ -68,10 +79,18 @@ func (r *repository) CreateItem(ctx context.Context, item TrackedItem) (*Tracked
 }
 
 func (r *repository) GetItemByID(ctx context.Context, id, userID string) (*TrackedItem, error) {
-    parsedUserID, err := utils.ParseUUID(userID)
-
-    if err != nil {
-        return nil, fmt.Errorf("invalid user ID: %w", err)
+    // Try to parse user ID as UUID, if it fails, generate a UUID from the string
+    var parsedUserID pgtype.UUID
+    if uuid, err := utils.ParseUUID(userID); err == nil {
+        parsedUserID = uuid
+    } else {
+        // Generate a deterministic UUID from the string user ID
+        hash := sha256.Sum256([]byte(userID))
+        userIDBytes := hash[:16] // Use first 16 bytes for UUID
+        var uuid pgtype.UUID
+        copy(uuid.Bytes[:], userIDBytes)
+        uuid.Valid = true
+        parsedUserID = uuid
     }
 
     parsedID, err := utils.ParseUUID(id)
@@ -226,10 +245,22 @@ func (r *repository) DeleteItem(ctx context.Context, id, userID string) error {
 }
 
 func (r *repository) UpdateItemPrice(ctx context.Context, id, userID string, currentPrice float64, inStock bool) (*TrackedItem, error) {
-    parsedUserID, err := utils.ParseUUID(userID)
+    log.Printf("UpdateItemPrice called: id=%s, userID=%s, currentPrice=%.2f, inStock=%t", id, userID, currentPrice, inStock)
 
-    if err != nil {
-        return nil, fmt.Errorf("invalid user ID: %w", err)
+    // Try to parse user ID as UUID, if it fails, generate a UUID from the string
+    var parsedUserID pgtype.UUID
+    if uuid, err := utils.ParseUUID(userID); err == nil {
+        parsedUserID = uuid
+        log.Printf("Parsed userID as UUID: %s -> %s", userID, uuid)
+    } else {
+        // Generate a deterministic UUID from the string user ID
+        hash := sha256.Sum256([]byte(userID))
+        userIDBytes := hash[:16] // Use first 16 bytes for UUID
+        var uuid pgtype.UUID
+        copy(uuid.Bytes[:], userIDBytes)
+        uuid.Valid = true
+        parsedUserID = uuid
+        log.Printf("Generated UUID from string userID: %s -> %s", userID, uuid)
     }
 
     parsedID, err := utils.ParseUUID(id)

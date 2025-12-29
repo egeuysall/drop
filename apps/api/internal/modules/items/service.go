@@ -3,7 +3,9 @@ package items
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/egeuysall/drop/internal/modules/scraper"
 	"github.com/egeuysall/drop/internal/utils"
@@ -47,10 +49,39 @@ func (s *service) CreateItem(ctx context.Context, userID string, req CreateItemR
         return nil, fmt.Errorf("duplicate item: %w", err)
     }
 
-    priceInfo, err := s.scraper.ScrapePrice(req.URL)
+    // Create a timeout context for scraping to prevent hanging
+    scrapeCtx, cancel := context.WithTimeout(ctx, 15*time.Second)
+    defer cancel()
 
-    if err != nil {
-        if strings.Contains(err.Error(), "out of stock") {
+    // Create a channel to receive the scrape result or timeout
+    resultChan := make(chan *scraper.PriceInfo, 1)
+    errorChan := make(chan error, 1)
+    var priceInfo *scraper.PriceInfo
+    var scrapeErr error
+
+    // Run scraping in a separate goroutine
+    go func() {
+        pi, err := s.scraper.ScrapePrice(req.URL)
+        if err != nil {
+            errorChan <- err
+        } else {
+            resultChan <- pi
+        }
+    }()
+
+    // Wait for result or timeout
+    select {
+    case pi := <-resultChan:
+        priceInfo = pi
+    case err := <-errorChan:
+        scrapeErr = err
+    case <-scrapeCtx.Done():
+        return nil, fmt.Errorf("price scraping timed out after 15 seconds")
+    }
+
+    // Handle the result
+    if scrapeErr != nil {
+        if strings.Contains(scrapeErr.Error(), "out of stock") {
             currentPrice := 0.0
 
             if req.TargetPrice != nil {
@@ -61,9 +92,9 @@ func (s *service) CreateItem(ctx context.Context, userID string, req CreateItemR
             req.CurrentPrice = currentPrice
             req.InStock = &inStock
         } else {
-            return nil, fmt.Errorf("failed to scrape price: %w", err)
+            return nil, fmt.Errorf("failed to scrape price: %w", scrapeErr)
         }
-    } else {
+    } else if priceInfo != nil {
         req.CurrentPrice = priceInfo.Price
         req.InStock = &priceInfo.InStock
     }
@@ -301,10 +332,13 @@ func (s *service) checkForDuplicateURLChange(ctx context.Context, userID, curren
 }
 
 func (s *service) RefreshPrice(ctx context.Context, itemID, userID, url string) error {
+    log.Printf("RefreshPrice called: itemID=%s, userID=%s, url=%s", itemID, userID, url)
+
     priceInfo, err := s.scraper.ScrapePrice(url)
 
     if err != nil {
         if strings.Contains(err.Error(), "out of stock") {
+            log.Printf("Item out of stock, setting price to 0: itemID=%s", itemID)
             _, err := s.repo.UpdateItemPrice(ctx, itemID, userID, 0, false)
             return err
         }
@@ -312,6 +346,7 @@ func (s *service) RefreshPrice(ctx context.Context, itemID, userID, url string) 
         return fmt.Errorf("failed to scrape price: %w", err)
     }
 
+    log.Printf("Updating price for item %s: $%.2f, in_stock=%t", itemID, priceInfo.Price, priceInfo.InStock)
     _, err = s.repo.UpdateItemPrice(ctx, itemID, userID, priceInfo.Price, priceInfo.InStock)
 
     if err != nil {

@@ -115,7 +115,7 @@ func (s *PriceRefresherScheduler) refreshAllPrices() {
 func (s *PriceRefresherScheduler) priceRefreshWorker(workerID int, jobs <-chan ItemJob, results chan<- string) {
     for job := range jobs {
         // Debug log showing which worker is processing which item
-        log.Printf("Worker %d processing item: %s", workerID, job.Name)
+        log.Printf("Worker %d processing item: %s (ID: %s, UserID: %s, URL: %s)", workerID, job.Name, job.ID, job.UserID, job.URL)
 
         err := s.itemsService.RefreshPrice(context.Background(), job.ID, job.UserID, job.URL)
 

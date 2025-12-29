@@ -4,12 +4,27 @@ import { QueryClient } from '@tanstack/react-query';
 // Create a client
 export const queryClient = new QueryClient();
 
-// Helper function to get auth token from storage (if needed)
-export function getAuthToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('authToken');
+// Helper function to get auth token from Supabase session
+export async function getAuthToken(): Promise<string | null> {
+  if (typeof window === 'undefined') {
+    return null;
   }
-  return null;
+
+  try {
+    const { createClient } = await import('../supabase/client');
+    const supabase = createClient();
+    const { data: { session }, error } = await supabase.auth.getSession();
+
+    if (error) {
+      console.error('Error getting session:', error);
+      return null;
+    }
+
+    return session?.access_token || null;
+  } catch (error) {
+    console.error('Error getting auth token:', error);
+    return null;
+  }
 }
 
 // Base API URL - should be configured from environment
@@ -36,8 +51,8 @@ export async function apiFetch<T>(
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
   try {
-    // Get auth token if available
-    const token = getAuthToken();
+    // Get auth token if available (async)
+    const token = await getAuthToken();
     
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       ...options,
@@ -46,9 +61,16 @@ export async function apiFetch<T>(
         ...(token && { 'Authorization': `Bearer ${token}` }),
         ...options?.headers,
       },
+      credentials: 'include', // Include cookies for session management
     });
 
-    const data = await response.json();
+    // Handle empty responses (e.g., DELETE requests returning 204 No Content)
+    let data;
+    if (response.status === 204) {
+      data = null as unknown as T;
+    } else {
+      data = await response.json();
+    }
 
     if (!response.ok) {
       return {

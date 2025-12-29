@@ -42,15 +42,22 @@ export async function proxy(request: NextRequest) {
   // Check if user is trying to access auth routes (root page is now login)
   const isAuthRoute = pathname === '/' || pathname === '/callback';
 
+  // Check if user is trying to access protected routes
+  const isProtectedRoute = pathname.startsWith('/app');
+
   // If user is authenticated and trying to access auth routes, redirect to /app
   if (session && isAuthRoute) {
     const redirectUrl = new URL('/app', request.url);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If user is not authenticated and not on auth routes, let them proceed
-  // (Additional logic for protected routes would go here)
+  // If user is not authenticated and trying to access protected routes, redirect to root
+  if (!session && isProtectedRoute) {
+    const redirectUrl = new URL('/', request.url);
+    return NextResponse.redirect(redirectUrl);
+  }
 
+  // Let authenticated users access protected routes and unauthenticated users access auth routes
   return NextResponse.next();
 }
 
